@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* In your main CSS file e.g., index.css or App.css */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(128, 128, 128, 0.4); /* Adjust color as needed */
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(128, 128, 128, 0.6); /* Adjust hover color */
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(128, 128, 128, 0.4) transparent; /* thumb track */
+}
+
+
+/* Add this to your global CSS file, e.g., src/index.css */
+.animated-gradient-bg {
+  background: linear-gradient(-45deg, #38bdf8, #0ea5e9, #0284c7, #0369a1); /* Light mode example gradient - adjust as needed */
+  background-size: 400% 400%;
+  animation: gradientBG 20s ease infinite;
+}
+
+/* If your dark mode is handled by Tailwind 'dark:' prefix on this class,
+   you might not need a separate dark mode definition here if the above gradient
+   is designed for when the dark class IS NOT present.
+   However, if you want a DIFFERENT gradient specifically for dark mode, you could do:
+*/
+.dark .animated-gradient-bg-dark { /* Use a different class name or ensure specificity */
+  background: linear-gradient(-45deg, #0c4a6e, #075985, #0369a1, #0284c7); /* Dark mode example - adjust */
+  background-size: 400% 400%;
+  animation: gradientBG 20s ease infinite;
+}
+
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Example in src/index.css for custom scrollbar (Tailwind doesn't do this out of box well) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Or a very subtle color */
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888; /* Adjust for light/dark mode if needed */
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Adjust for light/dark mode if needed */
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #555;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #333;
+}
