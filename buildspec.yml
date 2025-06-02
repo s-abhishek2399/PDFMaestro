@@ -1,0 +1,57 @@
+# buildspec.yml (place this in the ROOT of your GitHub repository)
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9 # Match your backend's Python version
+      nodejs: 18  # Or your preferred LTS Node.js version for frontend build
+    commands:
+      - echo "Installing frontend dependencies..."
+      - cd frontend
+      - npm ci # Or yarn install --frozen-lockfile
+      - cd ..
+      # Backend dependencies will be installed by Elastic Beanstalk via requirements.txt
+
+  pre_build:
+    commands:
+      - echo "Running pre-build commands..."
+      # Example: Set API URL for frontend build dynamically if needed
+      # This assumes EB_BACKEND_URL is an environment variable available in CodeBuild
+      # (You can pass environment variables from CodePipeline to CodeBuild)
+      - echo "VITE_API_URL=${EB_BACKEND_URL}/api" > frontend/.env.production
+      # Or, if your EB URL is static and you don't want to manage it as a secret in CB:
+      # - echo "VITE_API_URL=http://your-eb-environment-url.elasticbeanstalk.com/api" > frontend/.env.production
+      - echo "Frontend .env.production created/updated for API URL"
+
+  build:
+    commands:
+      - echo "Building frontend..."
+      - cd frontend
+      - npm run build
+      - cd ..
+      - echo "Copying frontend build to backend static directory..."
+      # Create static/app directory in backend if it doesn't exist
+      - mkdir -p backend/static/app 
+      # Copy frontend build to backend/static/app (or just backend/static if you prefer)
+      - cp -r frontend/dist/* backend/static/app/
+      - echo "Frontend build copied."
+      - echo "Zipping backend application for Elastic Beanstalk..."
+      - cd backend
+      # Create a ZIP file containing all necessary backend files + frontend build
+      # Exclude venv, .git, .vscode, __pycache__, .env etc.
+      # The ZIP needs to be created from *within* the backend directory for EB to process .ebextensions correctly
+      - zip -r ../pdfmaestro-backend-deploy.zip . -x "venv/*" ".git/*" ".vscode/*" "__pycache__/*" "*.pyc" ".env*" ".DS_Store" "*/.DS_Store"
+      - cd ..
+      - echo "Backend deployment package created."
+
+  post_build:
+    commands:
+      - echo "Build completed on $(date)"
+      # No specific post-build commands needed if EB handles deployment directly
+
+artifacts:
+  files:
+    - pdfmaestro-backend-deploy.zip # This is the artifact CodePipeline will pass to Elastic Beanstalk
+  # discard-paths: yes # Optional: to clean up workspace if not needed
+  # base-directory: '.' # Optional: specify base if artifact is not in root
